@@ -1,9 +1,11 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const morgan = require("morgan");
+const cors = require("cors");
 
 const app = express();
 app.use(morgan("dev"));
+app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 
@@ -15,10 +17,17 @@ const client = new MongoClient(uri, {
   useUnifiedTopology: true,
 });
 client.connect((err) => {
-  const collection = client.db("test").collection("devices");
+  const bookings = client.db("bruj").collection("booking");
   // perform actions on the collection object
   console.log("DB Connected!");
-  client.close();
+
+  app.post("/addBooking", (req, res) => {
+    const newBooking = req.body;
+    bookings.insertOne(newBooking).then((result) => {
+      res.send(result.insertedCount > 0);
+    });
+    console.log(newBooking);
+  });
 });
 
 app.get("/", (req, res) => {
