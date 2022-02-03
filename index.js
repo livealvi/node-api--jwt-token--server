@@ -21,12 +21,19 @@ client.connect((err) => {
   // perform actions on the collection object
   console.log("DB Connected!");
 
+  //read
+  app.get("/bookings", (req, res) => {
+    bookings.find({ email: req.query.email }).toArray((error, documents) => {
+      res.send(documents);
+    });
+  });
+
+  //insert
   app.post("/addBooking", (req, res) => {
     const newBooking = req.body;
     bookings.insertOne(newBooking).then((result) => {
       res.send(result.insertedCount > 0);
     });
-    console.log(newBooking);
   });
 });
 
