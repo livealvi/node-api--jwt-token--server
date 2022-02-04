@@ -9,6 +9,16 @@ app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 
+//firebase - admin token
+var admin = require("firebase-admin");
+var serviceAccount = require("./burj-c0be9-firebase-adminsdk-aier2-4be0d9562e.json");
+
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount),
+});
+//firebase - admin token
+
+//mongodb
 const { MongoClient } = require("mongodb");
 const uri =
   "mongodb+srv://bruj:bruj121@cluster0.amhkf.mongodb.net/bruj?retryWrites=true&w=majority";
@@ -23,10 +33,28 @@ client.connect((err) => {
 
   //read
   app.get("/bookings", (req, res) => {
-    console.log(req.headers.authorization);
-    bookings.find({ email: req.query.email }).toArray((error, documents) => {
-      res.send(documents);
-    });
+    const bearer = req.headers.authorization;
+    if (bearer && bearer.startsWith("Bearer ")) {
+      const idToken = bearer.split(" ")[1];
+      console.log({ idToken });
+      // idToken comes from the client app
+      admin
+        .auth()
+        .verifyIdToken(idToken)
+        .then((decodedToken) => {
+          const tokenEmail = decodedToken.email;
+          if (tokenEmail == req.query.email) {
+            bookings
+              .find({ email: req.query.email })
+              .toArray((error, documents) => {
+                res.send(documents);
+              });
+          }
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    }
   });
 
   //insert
