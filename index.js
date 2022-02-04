@@ -23,6 +23,7 @@ client.connect((err) => {
 
   //read
   app.get("/bookings", (req, res) => {
+    console.log(req.headers.authorization);
     bookings.find({ email: req.query.email }).toArray((error, documents) => {
       res.send(documents);
     });
