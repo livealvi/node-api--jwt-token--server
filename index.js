@@ -1,13 +1,18 @@
+require("dotenv").config();
 const express = require("express");
 const bodyParser = require("body-parser");
 const morgan = require("morgan");
 const cors = require("cors");
+const { MongoClient } = require("mongodb");
 
 const app = express();
 app.use(morgan("dev"));
 app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
+
+//mongodb - uri
+const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.amhkf.mongodb.net/bruj?retryWrites=true&w=majority`;
 
 //firebase - admin token
 var admin = require("firebase-admin");
@@ -18,10 +23,7 @@ admin.initializeApp({
 });
 //firebase - admin token
 
-//mongodb
-const { MongoClient } = require("mongodb");
-const uri =
-  "mongodb+srv://bruj:bruj121@cluster0.amhkf.mongodb.net/bruj?retryWrites=true&w=majority";
+//mongodb - CURD
 const client = new MongoClient(uri, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
